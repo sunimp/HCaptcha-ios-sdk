@@ -45,47 +45,47 @@ public enum HCaptchaError: Error, CustomStringConvertible {
     case invalidCustomTheme
 
     public static func == (lhs: HCaptchaError, rhs: HCaptchaError) -> Bool {
-        return lhs.description == rhs.description
+        lhs.description == rhs.description
     }
 
     /// A human-readable description for each error
     public var description: String {
         switch self {
         case .unexpected(let error):
-            return "Unexpected Error: \(error)"
+            "Unexpected Error: \(error)"
 
         case .networkError:
-            return "Network issues"
+            "Network issues"
 
         case .htmlLoadError:
-            return "Could not load embedded HTML"
+            "Could not load embedded HTML"
 
         case .apiKeyNotFound:
-            return "HCaptchaKey not provided"
+            "HCaptchaKey not provided"
 
         case .baseURLNotFound:
-            return "HCaptchaDomain not provided"
+            "HCaptchaDomain not provided"
 
         case .wrongMessageFormat:
-            return "Unexpected message from javascript"
+            "Unexpected message from javascript"
 
         case .failedSetup:
-            return """
+            """
             ⚠️ WARNING! HCaptcha wasn't successfully configured. Please double check your HCaptchaKey and HCaptchaDomain.
             Also check that you're using the hCaptcha **SITE KEY** for client side integration.
             """
 
         case .sessionTimeout:
-            return "Response expired and need to re-verify"
+            "Response expired and need to re-verify"
 
         case .challengeClosed:
-            return "User closed challenge without answering"
+            "User closed challenge without answering"
 
         case .rateLimit:
-            return "User was rate-limited"
+            "User was rate-limited"
 
         case .invalidCustomTheme:
-            return "Invalid JSON or JSObject as customTheme"
+            "Invalid JSON or JSObject as customTheme"
         }
     }
 }

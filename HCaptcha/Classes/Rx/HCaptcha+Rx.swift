@@ -13,14 +13,12 @@ import HCaptcha
 #endif
 
 /// Provides a public extension on HCaptcha that makes it reactive.
-public extension Reactive where Base: HCaptcha {
+extension Reactive where Base: HCaptcha {
 
-    /**
-     Returns observable which allows to listen for different events from SDK
-     */
-    func events() -> Observable<(HCaptchaEvent, Any?)> {
-        return Observable<(HCaptchaEvent, Any?)>.create { [weak base] observer -> Disposable in
-            base?.onEvent { (event, data) in
+    /// Returns observable which allows to listen for different events from SDK
+    public func events() -> Observable<(HCaptchaEvent, Any?)> {
+        Observable<(HCaptchaEvent, Any?)>.create { [weak base] observer -> Disposable in
+            base?.onEvent { event, data in
                 observer.onNext((event, data))
             }
 
@@ -31,22 +29,20 @@ public extension Reactive where Base: HCaptcha {
         }
     }
 
-    /**
-     - parameters:
-        - view: The view that should present the webview.
-        - resetOnError: If HCaptcha should be reset if it errors. Defaults to `true`
-     
-     Starts the challenge validation uppon subscription.
-
-     The stream's element is a String with the validation token.
-
-     Sends `stop()` uppon disposal.
-     
-     - See: `HCaptcha.validate(on:resetOnError:completion:)`
-     - See: `HCaptcha.stop()`
-     */
-    func validate(on view: UIView, resetOnError: Bool = true) -> Observable<String> {
-        return Single<String>.create { [weak base] single in
+    /// - parameters:
+    ///   - view: The view that should present the webview.
+    ///   - resetOnError: If HCaptcha should be reset if it errors. Defaults to `true`
+    ///
+    /// Starts the challenge validation uppon subscription.
+    ///
+    /// The stream's element is a String with the validation token.
+    ///
+    /// Sends `stop()` uppon disposal.
+    ///
+    /// - See: `HCaptcha.validate(on:resetOnError:completion:)`
+    /// - See: `HCaptcha.stop()`
+    public func validate(on view: UIView, resetOnError: Bool = true) -> Observable<String> {
+        Single<String>.create { [weak base] single in
             base?.validate(on: view, resetOnError: resetOnError) { result in
                 do {
                     single(.success(try result.dematerialize()))
@@ -62,15 +58,13 @@ public extension Reactive where Base: HCaptcha {
         .asObservable()
     }
 
-    /**
-     Resets the HCaptcha.
-
-     The reset is achieved by calling `ghcaptcha.reset()` on the JS API.
-
-     - See: `HCaptcha.reset()`
-     */
-    var reset: AnyObserver<Void> {
-        return AnyObserver { [weak base] event in
+    /// Resets the HCaptcha.
+    ///
+    /// The reset is achieved by calling `ghcaptcha.reset()` on the JS API.
+    ///
+    /// - See: `HCaptcha.reset()`
+    public var reset: AnyObserver<Void> {
+        AnyObserver { [weak base] event in
             guard case .next = event else {
                 return
             }
@@ -79,15 +73,13 @@ public extension Reactive where Base: HCaptcha {
         }
     }
 
-    /**
-     Notifies when the webview finishes loading all JS resources
-
-     This Observable may produce multiple events since the resources may be loaded multiple times in
-     case of error or reset. This may also immediately produce an event if the resources have
-     already finished loading when you subscribe to this Observable.
-     */
-    var didFinishLoading: Observable<Void> {
-        return Observable.create { [weak base] (observer: AnyObserver<Void>) in
+    /// Notifies when the webview finishes loading all JS resources
+    ///
+    /// This Observable may produce multiple events since the resources may be loaded multiple times in
+    /// case of error or reset. This may also immediately produce an event if the resources have
+    /// already finished loading when you subscribe to this Observable.
+    public var didFinishLoading: Observable<Void> {
+        Observable.create { [weak base] (observer: AnyObserver<Void>) in
             base?.didFinishLoading { observer.onNext(()) }
 
             return Disposables.create { [weak base] in

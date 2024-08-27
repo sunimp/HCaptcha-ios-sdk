@@ -6,12 +6,13 @@
 //  Copyright © 2018 HCaptcha. All rights reserved.
 //
 
-import WebKit
-import UIKit
 import JavaScriptCore
+import UIKit
+import WebKit
 
-/** Widget display mode
- */
+// MARK: - HCaptchaSize
+
+/// Widget display mode
 @objc
 public enum HCaptchaSize: Int, RawRepresentable {
     case invisible
@@ -23,11 +24,11 @@ public enum HCaptchaSize: Int, RawRepresentable {
     public var rawValue: RawValue {
         switch self {
         case .invisible:
-            return "invisible"
+            "invisible"
         case .compact:
-            return "compact"
+            "compact"
         case .normal:
-            return "normal"
+            "normal"
         }
     }
 
@@ -45,8 +46,9 @@ public enum HCaptchaSize: Int, RawRepresentable {
     }
 }
 
-/** Widget orientation mode
- */
+// MARK: - HCaptchaOrientation
+
+/// Widget orientation mode
 @objc
 public enum HCaptchaOrientation: Int, RawRepresentable {
     case portrait
@@ -57,9 +59,9 @@ public enum HCaptchaOrientation: Int, RawRepresentable {
     public var rawValue: RawValue {
         switch self {
         case .portrait:
-            return "portrait"
+            "portrait"
         case .landscape:
-            return "landscape"
+            "landscape"
         }
     }
 
@@ -75,8 +77,9 @@ public enum HCaptchaOrientation: Int, RawRepresentable {
     }
 }
 
-/** Internal data model to keep SDK init params
- */
+// MARK: - HCaptchaConfig
+
+/// Internal data model to keep SDK init params
 struct HCaptchaConfig: CustomDebugStringConvertible {
     /// The raw unformated HTML file content
     let html: String
@@ -139,7 +142,7 @@ struct HCaptchaConfig: CustomDebugStringConvertible {
 
     /// Return actual theme value based on init params. It must return valid JS object.
     var actualTheme: String {
-        self.customTheme ?? "\"\(theme)\""
+        customTheme ?? "\"\(theme)\""
     }
 
     /// The Bundle that holds HCaptcha's assets
@@ -148,9 +151,11 @@ struct HCaptchaConfig: CustomDebugStringConvertible {
         return Bundle.module
         #else
         let bundle = Bundle(for: HCaptcha.self)
-        guard let cocoapodsBundle = bundle
+        guard
+            let cocoapodsBundle = bundle
                 .path(forResource: "HCaptcha", ofType: "bundle")
-                .flatMap(Bundle.init(path:)) else {
+                .flatMap(Bundle.init(path:))
+        else {
             return bundle
         }
 
@@ -163,7 +168,7 @@ struct HCaptchaConfig: CustomDebugStringConvertible {
 
         var result = "HCaptchaConfig("
         for (label, value) in mirror.children {
-            if let label = label, label != "html" {
+            if let label, label != "html" {
                 result.append("\(label): \(value), ")
             }
         }
@@ -176,40 +181,40 @@ struct HCaptchaConfig: CustomDebugStringConvertible {
         return result + ")"
     }
 
-    /**
-     - parameters:
-         - apiKey: The API key sent to the HCaptcha init
-         - infoPlistKey: The API key retrived from the application's Info.plist
-         - baseURL: The base URL sent to the HCaptcha init
-         - infoPlistURL: The base URL retrieved from the application's Info.plist
-
-     - Throws: `HCaptchaError.htmlLoadError`: if is unable to load the HTML embedded in the bundle.
-     - Throws: `HCaptchaError.apiKeyNotFound`: if an `apiKey` is not provided and can't find one in the project's
-     Info.plist.
-     - Throws: `HCaptchaError.baseURLNotFound`: if a `baseURL` is not provided and can't find one in the project's
-     Info.plist.
-     - Throws: Rethrows any exceptions thrown by `String(contentsOfFile:)`
-     */
-    public init(html: String = HCaptchaHtml.template,
-                apiKey: String?,
-                passiveApiKey: Bool?,
-                infoPlistKey: String?,
-                baseURL: URL?,
-                infoPlistURL: URL?,
-                jsSrc: URL,
-                size: HCaptchaSize,
-                orientation: HCaptchaOrientation,
-                rqdata: String?,
-                sentry: Bool?,
-                endpoint: URL?,
-                reportapi: URL?,
-                assethost: URL?,
-                imghost: URL?,
-                host: String?,
-                theme: String,
-                customTheme: String?,
-                locale: Locale?,
-                loadingTimeout: TimeInterval = 5.0) throws {
+    /// - parameters:
+    ///    - apiKey: The API key sent to the HCaptcha init
+    ///    - infoPlistKey: The API key retrived from the application's Info.plist
+    ///    - baseURL: The base URL sent to the HCaptcha init
+    ///    - infoPlistURL: The base URL retrieved from the application's Info.plist
+    ///
+    /// - Throws: `HCaptchaError.htmlLoadError`: if is unable to load the HTML embedded in the bundle.
+    /// - Throws: `HCaptchaError.apiKeyNotFound`: if an `apiKey` is not provided and can't find one in the project's
+    /// Info.plist.
+    /// - Throws: `HCaptchaError.baseURLNotFound`: if a `baseURL` is not provided and can't find one in the project's
+    /// Info.plist.
+    /// - Throws: Rethrows any exceptions thrown by `String(contentsOfFile:)`
+    public init(
+        html: String = HCaptchaHtml.template,
+        apiKey: String?,
+        passiveApiKey: Bool?,
+        infoPlistKey: String?,
+        baseURL: URL?,
+        infoPlistURL: URL?,
+        jsSrc: URL,
+        size: HCaptchaSize,
+        orientation: HCaptchaOrientation,
+        rqdata: String?,
+        sentry: Bool?,
+        endpoint: URL?,
+        reportapi: URL?,
+        assethost: URL?,
+        imghost: URL?,
+        host: String?,
+        theme: String,
+        customTheme: String?,
+        locale: Locale?,
+        loadingTimeout: TimeInterval = 5.0
+    ) throws {
         guard let apiKey = apiKey ?? infoPlistKey else {
             throw HCaptchaError.apiKeyNotFound
         }
@@ -218,8 +223,8 @@ struct HCaptchaConfig: CustomDebugStringConvertible {
             throw HCaptchaError.baseURLNotFound
         }
 
-        if let customTheme = customTheme {
-            let validationJS: String = "(function() { return \(customTheme) })()"
+        if let customTheme {
+            let validationJS = "(function() { return \(customTheme) })()"
             let context = JSContext()!
             context.exceptionHandler = { _, err in
                 HCaptchaLogger.error("customTheme validation error: \(String(describing: err))")
@@ -250,19 +255,17 @@ struct HCaptchaConfig: CustomDebugStringConvertible {
         self.loadingTimeout = loadingTimeout
     }
 
-    /**
-     The JS API endpoint to be loaded onto the HTML file.
-     */
+    /// The JS API endpoint to be loaded onto the HTML file.
     public var actualEndpoint: URL {
         var result = URLComponents(url: jsSrc, resolvingAgainstBaseURL: false)!
         var queryItems = [
             URLQueryItem(name: "onload", value: "onloadCallback"),
             URLQueryItem(name: "render", value: "explicit"),
             URLQueryItem(name: "recaptchacompat", value: "off"),
-            URLQueryItem(name: "host", value: host ?? "\(apiKey).ios-sdk.hcaptcha.com")
+            URLQueryItem(name: "host", value: host ?? "\(apiKey).ios-sdk.hcaptcha.com"),
         ]
 
-        if let sentry = sentry {
+        if let sentry {
             queryItems.append(URLQueryItem(name: "sentry", value: String(sentry)))
         }
         if let url = endpoint {
@@ -277,7 +280,7 @@ struct HCaptchaConfig: CustomDebugStringConvertible {
         if let url = reportapi {
             queryItems.append(URLQueryItem(name: "reportapi", value: url.absoluteString))
         }
-        if let locale = locale {
+        if let locale {
             queryItems.append(URLQueryItem(name: "hl", value: locale.identifier))
         }
         if customTheme != nil {
@@ -286,8 +289,8 @@ struct HCaptchaConfig: CustomDebugStringConvertible {
 
         result.percentEncodedQuery = queryItems.map {
             $0.name +
-            "=" +
-            $0.value!.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlHostAllowed)!
+                "=" +
+                $0.value!.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlHostAllowed)!
         }.joined(separator: "&")
 
         return result.url!
@@ -296,22 +299,20 @@ struct HCaptchaConfig: CustomDebugStringConvertible {
 
 // MARK: - Private Methods
 
-private extension HCaptchaConfig {
-    /**
-     - parameter url: The URL to be fixed
-     - returns: An URL with scheme
-
-     If the given URL has no scheme, prepends `http://` to it and return the fixed URL.
-     */
-    static func fixSchemeIfNeeded(for url: URL) -> URL {
+extension HCaptchaConfig {
+    /// - parameter url: The URL to be fixed
+    /// - returns: An URL with scheme
+    ///
+    /// If the given URL has no scheme, prepends `http://` to it and return the fixed URL.
+    fileprivate static func fixSchemeIfNeeded(for url: URL) -> URL {
         guard url.scheme?.isEmpty != false else {
             return url
         }
 
         HCaptchaLogger.warn("""
-                               ⚠️ WARNING! Protocol not found for HCaptcha domain (\(url))!
-                               You should add http:// or https:// to it!
-                            """)
+               ⚠️ WARNING! Protocol not found for HCaptcha domain (\(url))!
+               You should add http:// or https:// to it!
+            """)
 
         if let fixedURL = URL(string: "http://" + url.absoluteString) {
             return fixedURL

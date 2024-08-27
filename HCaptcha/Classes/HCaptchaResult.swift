@@ -8,10 +8,9 @@
 
 import Foundation
 
-/** The HCaptcha result.
-
- This may contain the validation token on success, or an error that may have occurred.
- */
+/// The HCaptcha result.
+///
+/// This may contain the validation token on success, or an error that may have occurred.
 @objc
 public class HCaptchaResult: NSObject {
 
@@ -24,28 +23,26 @@ public class HCaptchaResult: NSObject {
     /// Manager
     let manager: HCaptchaWebViewManager
 
-    internal init (_ manager: HCaptchaWebViewManager, token: String? = nil, error: HCaptchaError? = nil) {
+    init(_ manager: HCaptchaWebViewManager, token: String? = nil, error: HCaptchaError? = nil) {
         self.manager = manager
         self.token = token
         self.error = error
     }
 
-    /**
-     - returns: The validation token uppon success.
-
-     Tries to unwrap the Result and retrieve the token if it's successful.
-
-     - Throws: `HCaptchaError`
-     */
+    /// - returns: The validation token uppon success.
+    ///
+    /// Tries to unwrap the Result and retrieve the token if it's successful.
+    ///
+    /// - Throws: `HCaptchaError`
     @objc
     public func dematerialize() throws -> String {
         manager.resultHandled = true
 
-        if let token = self.token {
+        if let token {
             return token
         }
 
-        if let error = self.error {
+        if let error {
             throw error
         }
 

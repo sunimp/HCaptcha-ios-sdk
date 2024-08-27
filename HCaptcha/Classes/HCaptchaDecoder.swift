@@ -10,11 +10,11 @@ import Foundation
 import WebKit
 
 
-/** The Decoder of javascript messages from the webview
- */
-internal class HCaptchaDecoder: NSObject {
-    /** The decoder result.
-     */
+// MARK: - HCaptchaDecoder
+
+/// The Decoder of javascript messages from the webview
+class HCaptchaDecoder: NSObject {
+    /// The decoder result.
     enum Result {
         /// A result token, if any
         case token(String)
@@ -45,13 +45,11 @@ internal class HCaptchaDecoder: NSObject {
     }
 
     /// The closure that receives messages
-    fileprivate let sendMessage: ((Result) -> Void)
+    fileprivate let sendMessage: (Result) -> Void
 
-    /**
-     - parameter didReceiveMessage: A closure that receives a HCaptchaDecoder.Result
-
-     Initializes a decoder with a completion closure.
-     */
+    /// - parameter didReceiveMessage: A closure that receives a HCaptchaDecoder.Result
+    ///
+    /// Initializes a decoder with a completion closure.
     init(didReceiveMessage: @escaping (Result) -> Void) {
         sendMessage = didReceiveMessage
 
@@ -59,23 +57,20 @@ internal class HCaptchaDecoder: NSObject {
     }
 
 
-    /**
-     - parameter error: The error to be sent.
-
-     Sends an error to the completion closure
-     */
+    /// - parameter error: The error to be sent.
+    ///
+    /// Sends an error to the completion closure
     func send(error: HCaptchaError) {
         sendMessage(.error(error))
     }
 }
 
 
-// MARK: Script Handler
+// MARK: WKScriptMessageHandler
 
-/** Makes HCaptchaDecoder conform to `WKScriptMessageHandler`
- */
+/// Makes HCaptchaDecoder conform to `WKScriptMessageHandler`
 extension HCaptchaDecoder: WKScriptMessageHandler {
-    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+    func userContentController(_: WKUserContentController, didReceive message: WKScriptMessage) {
         guard let dict = message.body as? [String: Any] else {
             return sendMessage(.error(.wrongMessageFormat))
         }
@@ -87,24 +82,19 @@ extension HCaptchaDecoder: WKScriptMessageHandler {
 
 // MARK: - Result
 
-/** Private methods on `HCaptchaDecoder.Result`
- */
-fileprivate extension HCaptchaDecoder.Result {
+/// Private methods on `HCaptchaDecoder.Result`
+extension HCaptchaDecoder.Result {
 
-    /**
-     - parameter response: A dictionary containing the message to be parsed
-     - returns: A decoded HCaptchaDecoder.Result
-
-     Parses a dict received from the webview onto a `HCaptchaDecoder.Result`
-     */
-    static func from(response: [String: Any]) -> HCaptchaDecoder.Result {
+    /// - parameter response: A dictionary containing the message to be parsed
+    /// - returns: A decoded HCaptchaDecoder.Result
+    ///
+    /// Parses a dict received from the webview onto a `HCaptchaDecoder.Result`
+    fileprivate static func from(response: [String: Any]) -> HCaptchaDecoder.Result {
         if let token = response["token"] as? String {
             return .token(token)
-        }
-        else if let message = response["log"] as? String {
+        } else if let message = response["log"] as? String {
             return .log(message)
-        }
-        else if let error = response["error"] as? Int {
+        } else if let error = response["error"] as? Int {
             return from(error)
         }
 
@@ -124,50 +114,50 @@ fileprivate extension HCaptchaDecoder.Result {
     private static func from(_ error: Int) -> HCaptchaDecoder.Result {
         switch error {
         case 1:
-            return .error(.htmlLoadError)
+            .error(.htmlLoadError)
 
         case 7:
-            return .error(.networkError)
+            .error(.networkError)
 
         case 15:
-            return .error(.sessionTimeout)
+            .error(.sessionTimeout)
 
         case 29:
-            return .error(.failedSetup)
+            .error(.failedSetup)
 
         case 31:
-            return .error(.rateLimit)
+            .error(.rateLimit)
 
         case 30:
-            return .error(.challengeClosed)
+            .error(.challengeClosed)
 
         default:
-            return .error(.wrongMessageFormat)
+            .error(.wrongMessageFormat)
         }
     }
 
     private static func fromAction(_ action: String) -> HCaptchaDecoder.Result? {
         switch action {
         case "showHCaptcha":
-            return .showHCaptcha
+            .showHCaptcha
 
         case "didLoad":
-            return .didLoad
+            .didLoad
 
         case "onOpen":
-            return .onOpen
+            .onOpen
 
         case "onExpired":
-            return .onExpired
+            .onExpired
 
         case "onChallengeExpired":
-            return .onChallengeExpired
+            .onChallengeExpired
 
         case "onClose":
-            return .onClose
+            .onClose
 
         default:
-            return nil
+            nil
         }
     }
 }

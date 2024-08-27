@@ -7,8 +7,7 @@
 
 import Foundation
 
-/** Events which can be received from HCaptcha SDK
- */
+/// Events which can be received from HCaptcha SDK
 @objc
 public enum HCaptchaEvent: Int, RawRepresentable {
     case open
@@ -22,15 +21,15 @@ public enum HCaptchaEvent: Int, RawRepresentable {
     public var rawValue: RawValue {
         switch self {
         case .open:
-            return "open"
+            "open"
         case .expired:
-            return "expired"
+            "expired"
         case .challengeExpired:
-            return "challengeExpired"
+            "challengeExpired"
         case .close:
-            return "close"
+            "close"
         case .error:
-            return "error"
+            "error"
         }
     }
 

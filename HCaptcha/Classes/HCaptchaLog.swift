@@ -7,8 +7,9 @@
 
 import Foundation
 
-/** Internal SDK logger level
- */
+// MARK: - HCaptchaLogLevel
+
+/// Internal SDK logger level
 enum HCaptchaLogLevel: Int, CustomStringConvertible {
     case debug = 0
     case warning = 1
@@ -17,18 +18,19 @@ enum HCaptchaLogLevel: Int, CustomStringConvertible {
     var description: String {
         switch self {
         case .debug:
-            return "Debug"
+            "Debug"
         case .warning:
-            return "Warning"
+            "Warning"
         case .error:
-            return "Error"
+            "Error"
         }
     }
 }
 
-/** Internal SDK logger
- */
-internal class HCaptchaLogger {
+// MARK: - HCaptchaLogger
+
+/// Internal SDK logger
+class HCaptchaLogger {
     static var minLevel: HCaptchaLogLevel = .error
 
     static func debug(_ message: String, _ args: CVarArg...) {
@@ -44,16 +46,16 @@ internal class HCaptchaLogger {
     }
 
     static func log(level: HCaptchaLogLevel, message: String, args: [CVarArg]) {
-#if DEBUG
+        #if DEBUG
         guard level.rawValue >= minLevel.rawValue else {
             return
         }
 
         let formattedMessage = String(format: message, arguments: args)
-        let logMessage = "\(timestamp) \(threadId) HCaptcha/\(level.description): \(formattedMessage)"
+        let logMessage = "\(timestamp) \(threadID) HCaptcha/\(level.description): \(formattedMessage)"
 
         print(logMessage)
-#endif
+        #endif
     }
 
     private static var timestamp: String {
@@ -62,7 +64,7 @@ internal class HCaptchaLogger {
         return dateFormatter.string(from: Date())
     }
 
-    private static var threadId: String {
-        return Thread.isMainThread ? "main" : "\(pthread_self())"
+    private static var threadID: String {
+        Thread.isMainThread ? "main" : "\(pthread_self())"
     }
 }

@@ -5,31 +5,33 @@
 //  Copyright © 2024 HCaptcha. All rights reserved.
 //
 
-import Foundation
 import CommonCrypto
+import Foundation
 import ObjectiveC.runtime
 import UIKit
 
 extension String {
     func jsSanitize() -> String {
-        return self.replacingOccurrences(of: ".", with: "_")
+        replacingOccurrences(of: ".", with: "_")
     }
 }
 
-private func updateInfoFor(_ image: String, _ ctx: UnsafeMutablePointer<CC_MD5_CTX>, depth: UInt32 = 16) {
+private func updateInfoFor(_ image: String, _ ctx: UnsafeMutablePointer<CC_SHA256_CTX>, depth: UInt32 = 16) {
     var count: UInt32 = 0
     if let imagePtr = (image as NSString).utf8String {
-        let classes = objc_copyClassNamesForImage(imagePtr, &count)
-        for cls in UnsafeBufferPointer<UnsafePointer<CChar>>(start: classes, count: Int(min(depth, count))) {
-            CC_MD5_Update(ctx, cls, CC_LONG(strlen(cls)))
+        if let classes = objc_copyClassNamesForImage(imagePtr, &count) {
+            for cls in UnsafeBufferPointer<UnsafePointer<CChar>>(start: classes, count: Int(min(depth, count))) {
+                let length = strlen(cls)
+                CC_SHA256_Update(ctx, cls, CC_LONG(length))
+            }
+            classes.deallocate()
         }
-        classes?.deallocate()
     }
 }
 
-private func getFinalHash(_ ctx: UnsafeMutablePointer<CC_MD5_CTX>) -> String {
-    var digest: [UInt8] = Array(repeating: 0, count: Int(CC_MD5_DIGEST_LENGTH))
-    CC_MD5_Final(&digest, ctx)
+private func getFinalHash(_ ctx: UnsafeMutablePointer<CC_SHA256_CTX>) -> String {
+    var digest: [UInt8] = Array(repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
+    CC_SHA256_Final(&digest, ctx)
     let hexDigest = digest.map { String(format: "%02hhx", $0) }.joined()
     return hexDigest
 }
@@ -39,6 +41,8 @@ private func bundleShortVersion() -> String {
     let sdkBundleShortVer = sdkBundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
     return sdkBundleShortVer?.jsSanitize() ?? "unknown"
 }
+
+// MARK: - HCaptchaDebugInfo
 
 class HCaptchaDebugInfo {
 
@@ -56,19 +60,19 @@ class HCaptchaDebugInfo {
         let depth: UInt32 = 16
         var depsCount = 0
         var sysCount = 0
-        let depsCtx = UnsafeMutablePointer<CC_MD5_CTX>.allocate(capacity: 1)
-        let sysCtx = UnsafeMutablePointer<CC_MD5_CTX>.allocate(capacity: 1)
-        let appCtx = UnsafeMutablePointer<CC_MD5_CTX>.allocate(capacity: 1)
-        CC_MD5_Init(depsCtx)
-        CC_MD5_Init(sysCtx)
-        CC_MD5_Init(appCtx)
+        let depsCtx = UnsafeMutablePointer<CC_SHA256_CTX>.allocate(capacity: 1)
+        let sysCtx = UnsafeMutablePointer<CC_SHA256_CTX>.allocate(capacity: 1)
+        let appCtx = UnsafeMutablePointer<CC_SHA256_CTX>.allocate(capacity: 1)
+        CC_SHA256_Init(depsCtx)
+        CC_SHA256_Init(sysCtx)
+        CC_SHA256_Init(appCtx)
 
         for framework in Bundle.allFrameworks {
             guard let frameworkPath = URL(string: framework.bundlePath) else { continue }
             let frameworkBin = frameworkPath.deletingPathExtension().lastPathComponent
             let image = frameworkPath.appendingPathComponent(frameworkBin).absoluteString
             let systemFramework = image.contains("/Library/PrivateFrameworks/") ||
-                                  image.contains("/System/Library/Frameworks/")
+                image.contains("/System/Library/Frameworks/")
 
             if systemFramework && sysCount < depth {
                 sysCount += 1
@@ -98,7 +102,7 @@ class HCaptchaDebugInfo {
             "deps_\(String(describing: depsHash))",
             "app_\(String(describing: appHash))",
             "iver_\(String(describing: iver))",
-            "sdk_\(bundleShortVersion())"
+            "sdk_\(bundleShortVersion())",
         ]
     }
 }

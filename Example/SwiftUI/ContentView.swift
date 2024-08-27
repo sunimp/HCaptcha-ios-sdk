@@ -29,7 +29,7 @@ struct HCaptchaView: View {
     let placeholder = UIViewWrapperView()
 
     var body: some View {
-        VStack{
+        VStack {
             placeholder.frame(width: 640, height: 640, alignment: .center)
             Button(
                 "validate",
@@ -43,7 +43,6 @@ struct HCaptchaView: View {
             print(result)
         }
     }
-
 
     init() {
         hcaptcha = try? HCaptcha()

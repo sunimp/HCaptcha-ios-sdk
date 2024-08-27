@@ -6,17 +6,15 @@
 //  Copyright © 2018 HCaptcha. All rights reserved.
 //
 
-import WebKit
-import UIKit
 import JavaScriptCore
+import UIKit
+import WebKit
 
-/**
-  hCaptcha SDK facade (entry point)
-*/
+/// hCaptcha SDK facade (entry point)
 @objc
 public class HCaptcha: NSObject {
-    fileprivate struct Constants {
-        struct InfoDictKeys {
+    fileprivate enum Constants {
+        enum InfoDictKeys {
             static let APIKey = "HCaptchaKey"
             static let Domain = "HCaptchaDomain"
         }
@@ -27,37 +25,35 @@ public class HCaptcha: NSObject {
     /// The worker that handles webview events and communication
     let manager: HCaptchaWebViewManager
 
-    /**
-     - parameters:
-         - apiKey: The API key sent to the HCaptcha init
-         - baseURL: The base URL sent to the HCaptcha init
-         - locale: A locale value to translate HCaptcha into a different language
-         - size: A HCaptcha size check `HCaptchaSize` for more details
-         - orientation: A HCaptcha orientation: `.portrait` or `.landscape` is available
-         -  jsSrc: See Enterprise docs
-         - rqdata: See Enterprise docs.
-         - sentry: See Enterprise docs
-         - endpoint: See Enterprise docs
-         - reportapi: See Enterprise docs
-         - assethost: See Enterprise docs
-         - imghost: See Enterprise docs
-         - host: See Enterprise docs
-         - theme: HCaptcha supports `.light`, `dark` and `.contrast` themes
-         - customTheme: See Enterprise docs
-         - diagnosticLog: Emit detailed console logs for debugging
-
-     Initializes a HCaptcha object
-
-     Both `apiKey` and `baseURL` may be nil, in which case the lib will look for entries of `HCaptchaKey` and
-     `HCaptchaDomain`, respectively, in the project's Info.plist
-
-     - Throws: `HCaptchaError.htmlLoadError`: if is unable to load the HTML embedded in the bundle.
-     - Throws: `HCaptchaError.apiKeyNotFound`: if an `apiKey` is not provided and can't find one in the project's
-         Info.plist.
-     - Throws: `HCaptchaError.baseURLNotFound`: if a `baseURL` is not provided and can't find one in the project's
-         Info.plist.
-     - Throws: Rethrows any exceptions thrown by `String(contentsOfFile:)`
-     */
+    /// - parameters:
+    ///    - apiKey: The API key sent to the HCaptcha init
+    ///    - baseURL: The base URL sent to the HCaptcha init
+    ///    - locale: A locale value to translate HCaptcha into a different language
+    ///    - size: A HCaptcha size check `HCaptchaSize` for more details
+    ///    - orientation: A HCaptcha orientation: `.portrait` or `.landscape` is available
+    ///    -  jsSrc: See Enterprise docs
+    ///    - rqdata: See Enterprise docs.
+    ///    - sentry: See Enterprise docs
+    ///    - endpoint: See Enterprise docs
+    ///    - reportapi: See Enterprise docs
+    ///    - assethost: See Enterprise docs
+    ///    - imghost: See Enterprise docs
+    ///    - host: See Enterprise docs
+    ///    - theme: HCaptcha supports `.light`, `dark` and `.contrast` themes
+    ///    - customTheme: See Enterprise docs
+    ///    - diagnosticLog: Emit detailed console logs for debugging
+    ///
+    /// Initializes a HCaptcha object
+    ///
+    /// Both `apiKey` and `baseURL` may be nil, in which case the lib will look for entries of `HCaptchaKey` and
+    /// `HCaptchaDomain`, respectively, in the project's Info.plist
+    ///
+    /// - Throws: `HCaptchaError.htmlLoadError`: if is unable to load the HTML embedded in the bundle.
+    /// - Throws: `HCaptchaError.apiKeyNotFound`: if an `apiKey` is not provided and can't find one in the project's
+    ///    Info.plist.
+    /// - Throws: `HCaptchaError.baseURLNotFound`: if a `baseURL` is not provided and can't find one in the project's
+    ///    Info.plist.
+    /// - Throws: Rethrows any exceptions thrown by `String(contentsOfFile:)`
     @objc
     public convenience init(
         apiKey: String? = nil,
@@ -85,44 +81,42 @@ public class HCaptcha: NSObject {
         let plistApiKey = infoDict?[Constants.InfoDictKeys.APIKey] as? String
         let plistDomain = (infoDict?[Constants.InfoDictKeys.Domain] as? String).flatMap(URL.init(string:))
 
-        let config = try HCaptchaConfig(apiKey: apiKey,
-                                        passiveApiKey: passiveApiKey,
-                                        infoPlistKey: plistApiKey,
-                                        baseURL: baseURL,
-                                        infoPlistURL: plistDomain,
-                                        jsSrc: jsSrc,
-                                        size: size,
-                                        orientation: orientation,
-                                        rqdata: rqdata,
-                                        sentry: sentry,
-                                        endpoint: endpoint,
-                                        reportapi: reportapi,
-                                        assethost: assethost,
-                                        imghost: imghost,
-                                        host: host,
-                                        theme: theme,
-                                        customTheme: customTheme,
-                                        locale: locale)
+        let config = try HCaptchaConfig(
+            apiKey: apiKey,
+            passiveApiKey: passiveApiKey,
+            infoPlistKey: plistApiKey,
+            baseURL: baseURL,
+            infoPlistURL: plistDomain,
+            jsSrc: jsSrc,
+            size: size,
+            orientation: orientation,
+            rqdata: rqdata,
+            sentry: sentry,
+            endpoint: endpoint,
+            reportapi: reportapi,
+            assethost: assethost,
+            imghost: imghost,
+            host: host,
+            theme: theme,
+            customTheme: customTheme,
+            locale: locale
+        )
 
         Log.debug(".init with: \(config)")
 
         self.init(manager: HCaptchaWebViewManager(config: config))
     }
 
-    /**
-     - parameter manager: A HCaptchaWebViewManager instance.
-
-      Initializes HCaptcha with the given manager
-    */
+    /// - parameter manager: A HCaptchaWebViewManager instance.
+    ///
+    ///  Initializes HCaptcha with the given manager
     init(manager: HCaptchaWebViewManager) {
         self.manager = manager
     }
 
-    /**
-     - parameter reciever: A callback function
-
-       onEvent allow to subscribe to SDK's events
-     */
+    /// - parameter reciever: A callback function
+    ///
+    ///  onEvent allow to subscribe to SDK's events
     @objc
     public func onEvent(_ reciever: ((HCaptchaEvent, Any?) -> Void)? = nil) {
         Log.debug(".onEvent")
@@ -130,14 +124,12 @@ public class HCaptcha: NSObject {
         manager.onEvent = reciever
     }
 
-    /**
-     - parameters:
-         - view: The view that should present the webview.
-         - resetOnError: If HCaptcha should be reset if it errors. Defaults to `true`.
-         - completion: A closure that receives a HCaptchaResult which may contain a valid result token.
-
-     Starts the challenge validation
-    */
+    /// - parameters:
+    ///     - view: The view that should present the webview.
+    ///     - resetOnError: If HCaptcha should be reset if it errors. Defaults to `true`.
+    ///     - completion: A closure that receives a HCaptchaResult which may contain a valid result token.
+    ///
+    /// Starts the challenge validation
     @objc
     public func validate(on view: UIView, resetOnError: Bool = true, completion: @escaping (HCaptchaResult) -> Void) {
         Log.debug(".validate on: \(view) resetOnError: \(resetOnError)")
@@ -158,14 +150,12 @@ public class HCaptcha: NSObject {
     }
 
 
-    /**
-     - parameter configure: A closure that receives an instance of `WKWebView` for configuration.
-
-     Provides a closure to configure the webview for presentation if necessary.
-
-     If presentation is required, the webview will already be a subview of `presenterView` if one is provided. Otherwise
-     it might need to be added in a view currently visible.
-    */
+    /// - parameter configure: A closure that receives an instance of `WKWebView` for configuration.
+    ///
+    /// Provides a closure to configure the webview for presentation if necessary.
+    ///
+    /// If presentation is required, the webview will already be a subview of `presenterView` if one is provided. Otherwise
+    /// it might need to be added in a view currently visible.
     @objc
     public func configureWebView(_ configure: @escaping (WKWebView) -> Void) {
         Log.debug(".configureWebView")
@@ -173,11 +163,9 @@ public class HCaptcha: NSObject {
         manager.configureWebView = configure
     }
 
-    /**
-     Resets the HCaptcha.
-
-     The reset is achieved by calling `hcaptcha.reset()` on the JS API.
-    */
+    /// Resets the HCaptcha.
+    ///
+    /// The reset is achieved by calling `hcaptcha.reset()` on the JS API.
     @objc
     public func reset() {
         Log.debug(".reset")
@@ -185,26 +173,22 @@ public class HCaptcha: NSObject {
         manager.reset()
     }
 
-    /**
-     - parameter closure: A closure that is called when the JS bundle finishes loading.
-
-     Provides a closure to be notified when the webview finishes loading JS resources.
-
-     The closure may be called multiple times since the resources may also be loaded multiple times
-     in case of error or reset. This may also be immediately called if the resources have already
-     finished loading when you set the closure.
-    */
+    /// - parameter closure: A closure that is called when the JS bundle finishes loading.
+    ///
+    /// Provides a closure to be notified when the webview finishes loading JS resources.
+    ///
+    /// The closure may be called multiple times since the resources may also be loaded multiple times
+    /// in case of error or reset. This may also be immediately called if the resources have already
+    /// finished loading when you set the closure.
     @objc
     public func didFinishLoading(_ closure: (() -> Void)?) {
         Log.debug(".didFinishLoading")
         manager.onDidFinishLoading = closure
     }
 
-    /**
-     Request for a call to the `configureWebView` closure.
-
-     This may be useful if you need to modify the layout of hCaptcha.
-    */
+    /// Request for a call to the `configureWebView` closure.
+    ///
+    /// This may be useful if you need to modify the layout of hCaptcha.
     @objc
     public func redrawView() {
         manager.configureWebView?(manager.webView)
@@ -212,31 +196,29 @@ public class HCaptcha: NSObject {
 
     // MARK: - Development
 
-#if DEBUG
+    #if DEBUG
     /// Forces the challenge widget to be explicitly displayed.
     @objc
     public var forceVisibleChallenge: Bool {
-        get { return manager.forceVisibleChallenge }
+        get { manager.forceVisibleChallenge }
         set {
             manager.forceVisibleChallenge = newValue
         }
     }
 
-    /**
-     Allows validation stubbing for testing
-
-     When this property is set to `true`, every call to `validate()` will immediately be resolved with `.token("")`.
-     
-     Use only when testing your application.
-    */
+    /// Allows validation stubbing for testing
+    ///
+    /// When this property is set to `true`, every call to `validate()` will immediately be resolved with `.token("")`.
+    ///
+    /// Use only when testing your application.
     @objc
     public var shouldSkipForTests: Bool {
-        get { return manager.shouldSkipForTests }
+        get { manager.shouldSkipForTests }
         set {
             manager.shouldSkipForTests = newValue
         }
     }
-#endif
+    #endif
 
     // MARK: - Objective-C 'convenience' inits
 
