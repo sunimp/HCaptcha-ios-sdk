@@ -30,9 +30,6 @@ let package = Package(
             exclude: ["Classes/Rx"],
             resources: [
                 .process("Resources/PrivacyInfo.xcprivacy")
-            ],
-            swiftSettings: [
-                .unsafeFlags(["-Xlinker", "-w"])
             ]
         ),
         .target(
@@ -41,10 +38,7 @@ let package = Package(
                 "HCaptcha",
                 .product(name: "RxSwift", package: "RxSwift")
             ],
-            path: "HCaptcha/Classes/Rx",
-            swiftSettings: [
-                .unsafeFlags(["-Xlinker", "-w"])
-            ]
+            path: "HCaptcha/Classes/Rx"
         )
     ]
 )
