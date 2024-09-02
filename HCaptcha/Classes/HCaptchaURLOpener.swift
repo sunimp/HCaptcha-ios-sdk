@@ -1,8 +1,7 @@
 //
 //  HCaptchaURLOpener.swift
-//  HCaptcha
 //
-//  Copyright © 2022 HCaptcha. All rights reserved.
+//  Created by Sun on 2022/10/25.
 //
 
 import Foundation

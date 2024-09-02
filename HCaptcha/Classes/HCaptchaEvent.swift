@@ -1,8 +1,7 @@
 //
 //  HCaptchaEvent.swift
-//  HCaptcha
 //
-//  Copyright © 2022 HCaptcha. All rights reserved.
+//  Created by Sun on 2022/5/10.
 //
 
 import Foundation
@@ -16,7 +15,11 @@ public enum HCaptchaEvent: Int, RawRepresentable {
     case close
     case error
 
+    // MARK: Nested Types
+
     public typealias RawValue = String
+
+    // MARK: Computed Properties
 
     public var rawValue: RawValue {
         switch self {
@@ -32,6 +35,8 @@ public enum HCaptchaEvent: Int, RawRepresentable {
             "error"
         }
     }
+
+    // MARK: Lifecycle
 
     public init?(rawValue: RawValue) {
         switch rawValue {

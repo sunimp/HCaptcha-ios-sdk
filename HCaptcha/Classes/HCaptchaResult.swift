@@ -1,9 +1,7 @@
 //
-//  HCaptchaWebViewManager.swift
-//  HCaptcha
+//  HCaptchaResult.swift
 //
-//  Created by Flávio Caetano on 06/03/17.
-//  Copyright © 2018 HCaptcha. All rights reserved.
+//  Created by Sun on 2020/6/25.
 //
 
 import Foundation
@@ -13,6 +11,7 @@ import Foundation
 /// This may contain the validation token on success, or an error that may have occurred.
 @objc
 public class HCaptchaResult: NSObject {
+    // MARK: Properties
 
     /// Result token
     let token: String?
@@ -23,11 +22,15 @@ public class HCaptchaResult: NSObject {
     /// Manager
     let manager: HCaptchaWebViewManager
 
+    // MARK: Lifecycle
+
     init(_ manager: HCaptchaWebViewManager, token: String? = nil, error: HCaptchaError? = nil) {
         self.manager = manager
         self.token = token
         self.error = error
     }
+
+    // MARK: Functions
 
     /// - returns: The validation token uppon success.
     ///

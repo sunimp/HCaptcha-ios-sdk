@@ -21,7 +21,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/ReactiveX/RxSwift", .upToNextMajor(from: "6.7.1")),
-        .package(url: "https://github.com/nicklockwood/SwiftFormat.git", from: "0.54.0"),
+        .package(url: "https://github.com/nicklockwood/SwiftFormat.git", from: "0.54.3"),
     ],
     targets: [
         .target(

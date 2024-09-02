@@ -1,9 +1,7 @@
 //
 //  HCaptcha.swift
-//  HCaptcha
 //
-//  Created by Flávio Caetano on 22/03/17.
-//  Copyright © 2018 HCaptcha. All rights reserved.
+//  Created by Sun on 2020/6/25.
 //
 
 import JavaScriptCore
@@ -13,6 +11,10 @@ import WebKit
 /// hCaptcha SDK facade (entry point)
 @objc
 public class HCaptcha: NSObject {
+    // MARK: Nested Types
+
+    typealias Log = HCaptchaLogger
+
     fileprivate enum Constants {
         enum InfoDictKeys {
             static let APIKey = "HCaptchaKey"
@@ -20,10 +22,40 @@ public class HCaptcha: NSObject {
         }
     }
 
-    typealias Log = HCaptchaLogger
+    // MARK: Properties
 
     /// The worker that handles webview events and communication
     let manager: HCaptchaWebViewManager
+
+    // MARK: Computed Properties
+
+    // MARK: - Development
+
+    #if DEBUG
+    /// Forces the challenge widget to be explicitly displayed.
+    @objc
+    public var forceVisibleChallenge: Bool {
+        get { manager.forceVisibleChallenge }
+        set {
+            manager.forceVisibleChallenge = newValue
+        }
+    }
+
+    /// Allows validation stubbing for testing
+    ///
+    /// When this property is set to `true`, every call to `validate()` will immediately be resolved with `.token("")`.
+    ///
+    /// Use only when testing your application.
+    @objc
+    public var shouldSkipForTests: Bool {
+        get { manager.shouldSkipForTests }
+        set {
+            manager.shouldSkipForTests = newValue
+        }
+    }
+    #endif
+
+    // MARK: Lifecycle
 
     /// - parameters:
     ///    - apiKey: The API key sent to the HCaptcha init
@@ -107,119 +139,6 @@ public class HCaptcha: NSObject {
         self.init(manager: HCaptchaWebViewManager(config: config))
     }
 
-    /// - parameter manager: A HCaptchaWebViewManager instance.
-    ///
-    ///  Initializes HCaptcha with the given manager
-    init(manager: HCaptchaWebViewManager) {
-        self.manager = manager
-    }
-
-    /// - parameter reciever: A callback function
-    ///
-    ///  onEvent allow to subscribe to SDK's events
-    @objc
-    public func onEvent(_ reciever: ((HCaptchaEvent, Any?) -> Void)? = nil) {
-        Log.debug(".onEvent")
-
-        manager.onEvent = reciever
-    }
-
-    /// - parameters:
-    ///     - view: The view that should present the webview.
-    ///     - resetOnError: If HCaptcha should be reset if it errors. Defaults to `true`.
-    ///     - completion: A closure that receives a HCaptchaResult which may contain a valid result token.
-    ///
-    /// Starts the challenge validation
-    @objc
-    public func validate(on view: UIView, resetOnError: Bool = true, completion: @escaping (HCaptchaResult) -> Void) {
-        Log.debug(".validate on: \(view) resetOnError: \(resetOnError)")
-
-        manager.shouldResetOnError = resetOnError
-        manager.completion = completion
-
-        manager.validate(on: view)
-    }
-
-
-    /// Stops the execution of the webview
-    @objc
-    public func stop() {
-        Log.debug(".stop")
-
-        manager.stop()
-    }
-
-
-    /// - parameter configure: A closure that receives an instance of `WKWebView` for configuration.
-    ///
-    /// Provides a closure to configure the webview for presentation if necessary.
-    ///
-    /// If presentation is required, the webview will already be a subview of `presenterView` if one is provided. Otherwise
-    /// it might need to be added in a view currently visible.
-    @objc
-    public func configureWebView(_ configure: @escaping (WKWebView) -> Void) {
-        Log.debug(".configureWebView")
-
-        manager.configureWebView = configure
-    }
-
-    /// Resets the HCaptcha.
-    ///
-    /// The reset is achieved by calling `hcaptcha.reset()` on the JS API.
-    @objc
-    public func reset() {
-        Log.debug(".reset")
-
-        manager.reset()
-    }
-
-    /// - parameter closure: A closure that is called when the JS bundle finishes loading.
-    ///
-    /// Provides a closure to be notified when the webview finishes loading JS resources.
-    ///
-    /// The closure may be called multiple times since the resources may also be loaded multiple times
-    /// in case of error or reset. This may also be immediately called if the resources have already
-    /// finished loading when you set the closure.
-    @objc
-    public func didFinishLoading(_ closure: (() -> Void)?) {
-        Log.debug(".didFinishLoading")
-        manager.onDidFinishLoading = closure
-    }
-
-    /// Request for a call to the `configureWebView` closure.
-    ///
-    /// This may be useful if you need to modify the layout of hCaptcha.
-    @objc
-    public func redrawView() {
-        manager.configureWebView?(manager.webView)
-    }
-
-    // MARK: - Development
-
-    #if DEBUG
-    /// Forces the challenge widget to be explicitly displayed.
-    @objc
-    public var forceVisibleChallenge: Bool {
-        get { manager.forceVisibleChallenge }
-        set {
-            manager.forceVisibleChallenge = newValue
-        }
-    }
-
-    /// Allows validation stubbing for testing
-    ///
-    /// When this property is set to `true`, every call to `validate()` will immediately be resolved with `.token("")`.
-    ///
-    /// Use only when testing your application.
-    @objc
-    public var shouldSkipForTests: Bool {
-        get { manager.shouldSkipForTests }
-        set {
-            manager.shouldSkipForTests = newValue
-        }
-    }
-    #endif
-
     // MARK: - Objective-C 'convenience' inits
 
     @objc
@@ -257,9 +176,96 @@ public class HCaptcha: NSObject {
         try self.init(apiKey: apiKey, baseURL: baseURL, locale: locale, size: .invisible)
     }
 
-
     @objc
     public convenience init(apiKey: String, baseURL: URL, locale: Locale, size: HCaptchaSize) throws {
         try self.init(apiKey: apiKey, baseURL: baseURL, locale: locale, size: size, rqdata: nil)
+    }
+
+    /// - parameter manager: A HCaptchaWebViewManager instance.
+    ///
+    ///  Initializes HCaptcha with the given manager
+    init(manager: HCaptchaWebViewManager) {
+        self.manager = manager
+    }
+
+    // MARK: Functions
+
+    /// - parameter reciever: A callback function
+    ///
+    ///  onEvent allow to subscribe to SDK's events
+    @objc
+    public func onEvent(_ reciever: ((HCaptchaEvent, Any?) -> Void)? = nil) {
+        Log.debug(".onEvent")
+
+        manager.onEvent = reciever
+    }
+
+    /// - parameters:
+    ///     - view: The view that should present the webview.
+    ///     - resetOnError: If HCaptcha should be reset if it errors. Defaults to `true`.
+    ///     - completion: A closure that receives a HCaptchaResult which may contain a valid result token.
+    ///
+    /// Starts the challenge validation
+    @objc
+    public func validate(on view: UIView, resetOnError: Bool = true, completion: @escaping (HCaptchaResult) -> Void) {
+        Log.debug(".validate on: \(view) resetOnError: \(resetOnError)")
+
+        manager.shouldResetOnError = resetOnError
+        manager.completion = completion
+
+        manager.validate(on: view)
+    }
+
+    /// Stops the execution of the webview
+    @objc
+    public func stop() {
+        Log.debug(".stop")
+
+        manager.stop()
+    }
+
+    /// - parameter configure: A closure that receives an instance of `WKWebView` for configuration.
+    ///
+    /// Provides a closure to configure the webview for presentation if necessary.
+    ///
+    /// If presentation is required, the webview will already be a subview of `presenterView` if one is provided.
+    /// Otherwise
+    /// it might need to be added in a view currently visible.
+    @objc
+    public func configureWebView(_ configure: @escaping (WKWebView) -> Void) {
+        Log.debug(".configureWebView")
+
+        manager.configureWebView = configure
+    }
+
+    /// Resets the HCaptcha.
+    ///
+    /// The reset is achieved by calling `hcaptcha.reset()` on the JS API.
+    @objc
+    public func reset() {
+        Log.debug(".reset")
+
+        manager.reset()
+    }
+
+    /// - parameter closure: A closure that is called when the JS bundle finishes loading.
+    ///
+    /// Provides a closure to be notified when the webview finishes loading JS resources.
+    ///
+    /// The closure may be called multiple times since the resources may also be loaded multiple times
+    /// in case of error or reset. This may also be immediately called if the resources have already
+    /// finished loading when you set the closure.
+    @objc
+    public func didFinishLoading(_ closure: (() -> Void)?) {
+        Log.debug(".didFinishLoading")
+        manager.onDidFinishLoading = closure
+    }
+
+    /// Request for a call to the `configureWebView` closure.
+    ///
+    /// This may be useful if you need to modify the layout of hCaptcha.
+    @objc
+    public func redrawView() {
+        manager.configureWebView?(manager.webView)
     }
 }

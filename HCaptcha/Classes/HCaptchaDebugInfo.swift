@@ -1,8 +1,7 @@
 //
-//  HCaptchaDebugInfo.m
-//  HCaptcha
+//  HCaptchaDebugInfo.swift
 //
-//  Copyright © 2024 HCaptcha. All rights reserved.
+//  Created by Sun on 2022/2/8.
 //
 
 import CommonCrypto
@@ -32,8 +31,7 @@ private func updateInfoFor(_ image: String, _ ctx: UnsafeMutablePointer<CC_SHA25
 private func getFinalHash(_ ctx: UnsafeMutablePointer<CC_SHA256_CTX>) -> String {
     var digest: [UInt8] = Array(repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
     CC_SHA256_Final(&digest, ctx)
-    let hexDigest = digest.map { String(format: "%02hhx", $0) }.joined()
-    return hexDigest
+    return digest.map { String(format: "%02hhx", $0) }.joined()
 }
 
 private func bundleShortVersion() -> String {
@@ -45,14 +43,21 @@ private func bundleShortVersion() -> String {
 // MARK: - HCaptchaDebugInfo
 
 class HCaptchaDebugInfo {
+    // MARK: Static Properties
 
     public static let json: String = HCaptchaDebugInfo.buildDebugInfoJson()
+
+    // MARK: Class Functions
 
     private class func buildDebugInfoJson() -> String {
         let failsafeJson = "[]"
         let encoder = JSONEncoder()
-        guard let jsonData = try? encoder.encode(buildDebugInfo()) else { return failsafeJson }
-        guard let json = String(data: jsonData, encoding: .utf8) else { return failsafeJson }
+        guard let jsonData = try? encoder.encode(buildDebugInfo()) else {
+            return failsafeJson
+        }
+        guard let json = String(data: jsonData, encoding: .utf8) else {
+            return failsafeJson
+        }
         return json
     }
 
@@ -68,7 +73,9 @@ class HCaptchaDebugInfo {
         CC_SHA256_Init(appCtx)
 
         for framework in Bundle.allFrameworks {
-            guard let frameworkPath = URL(string: framework.bundlePath) else { continue }
+            guard let frameworkPath = URL(string: framework.bundlePath) else {
+                continue
+            }
             let frameworkBin = frameworkPath.deletingPathExtension().lastPathComponent
             let image = frameworkPath.appendingPathComponent(frameworkBin).absoluteString
             let systemFramework = image.contains("/Library/PrivateFrameworks/") ||

@@ -1,8 +1,7 @@
 //
 //  HCaptchaWebViewManager+WKNavigationDelegate.swift
-//  HCaptcha
 //
-//  Copyright © 2024 HCaptcha. All rights reserved.
+//  Created by Sun on 2024/4/18.
 //
 
 import Foundation

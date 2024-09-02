@@ -1,19 +1,18 @@
 //
 //  HCaptchaDecoder.swift
-//  HCaptcha
 //
-//  Created by Flávio Caetano on 22/03/17.
-//  Copyright © 2018 HCaptcha. All rights reserved.
+//  Created by Sun on 2020/6/25.
 //
 
 import Foundation
 import WebKit
 
-
 // MARK: - HCaptchaDecoder
 
 /// The Decoder of javascript messages from the webview
 class HCaptchaDecoder: NSObject {
+    // MARK: Nested Types
+
     /// The decoder result.
     enum Result {
         /// A result token, if any
@@ -44,8 +43,12 @@ class HCaptchaDecoder: NSObject {
         case log(String)
     }
 
+    // MARK: Properties
+
     /// The closure that receives messages
     fileprivate let sendMessage: (Result) -> Void
+
+    // MARK: Lifecycle
 
     /// - parameter didReceiveMessage: A closure that receives a HCaptchaDecoder.Result
     ///
@@ -56,6 +59,7 @@ class HCaptchaDecoder: NSObject {
         super.init()
     }
 
+    // MARK: Functions
 
     /// - parameter error: The error to be sent.
     ///
@@ -64,7 +68,6 @@ class HCaptchaDecoder: NSObject {
         sendMessage(.error(error))
     }
 }
-
 
 // MARK: WKScriptMessageHandler
 
@@ -79,12 +82,10 @@ extension HCaptchaDecoder: WKScriptMessageHandler {
     }
 }
 
-
 // MARK: - Result
 
 /// Private methods on `HCaptchaDecoder.Result`
 extension HCaptchaDecoder.Result {
-
     /// - parameter response: A dictionary containing the message to be parsed
     /// - returns: A decoded HCaptchaDecoder.Result
     ///

@@ -1,8 +1,7 @@
 //
-//  HCaptchaEvent.swift
-//  HCaptcha
+//  HCaptchaLog.swift
 //
-//  Copyright © 2023 HCaptcha. All rights reserved.
+//  Created by Sun on 2023/7/18.
 //
 
 import Foundation
@@ -14,6 +13,8 @@ enum HCaptchaLogLevel: Int, CustomStringConvertible {
     case debug = 0
     case warning = 1
     case error = 2
+
+    // MARK: Computed Properties
 
     var description: String {
         switch self {
@@ -31,7 +32,23 @@ enum HCaptchaLogLevel: Int, CustomStringConvertible {
 
 /// Internal SDK logger
 class HCaptchaLogger {
+    // MARK: Static Properties
+
     static var minLevel: HCaptchaLogLevel = .error
+
+    // MARK: Static Computed Properties
+
+    private static var timestamp: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss.sss"
+        return dateFormatter.string(from: Date())
+    }
+
+    private static var threadID: String {
+        Thread.isMainThread ? "main" : "\(pthread_self())"
+    }
+
+    // MARK: Static Functions
 
     static func debug(_ message: String, _ args: CVarArg...) {
         log(level: .debug, message: message, args: args)
@@ -56,15 +73,5 @@ class HCaptchaLogger {
 
         print(logMessage)
         #endif
-    }
-
-    private static var timestamp: String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss.sss"
-        return dateFormatter.string(from: Date())
-    }
-
-    private static var threadID: String {
-        Thread.isMainThread ? "main" : "\(pthread_self())"
     }
 }

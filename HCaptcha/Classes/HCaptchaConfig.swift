@@ -1,9 +1,7 @@
 //
 //  HCaptchaConfig.swift
-//  HCaptcha
 //
-//  Created by Flávio Caetano on 22/03/17.
-//  Copyright © 2018 HCaptcha. All rights reserved.
+//  Created by Sun on 2021/12/26.
 //
 
 import JavaScriptCore
@@ -19,7 +17,11 @@ public enum HCaptchaSize: Int, RawRepresentable {
     case compact
     case normal
 
+    // MARK: Nested Types
+
     public typealias RawValue = String
+
+    // MARK: Computed Properties
 
     public var rawValue: RawValue {
         switch self {
@@ -31,6 +33,8 @@ public enum HCaptchaSize: Int, RawRepresentable {
             "normal"
         }
     }
+
+    // MARK: Lifecycle
 
     public init?(rawValue: RawValue) {
         switch rawValue {
@@ -54,7 +58,11 @@ public enum HCaptchaOrientation: Int, RawRepresentable {
     case portrait
     case landscape
 
+    // MARK: Nested Types
+
     public typealias RawValue = String
+
+    // MARK: Computed Properties
 
     public var rawValue: RawValue {
         switch self {
@@ -64,6 +72,8 @@ public enum HCaptchaOrientation: Int, RawRepresentable {
             "landscape"
         }
     }
+
+    // MARK: Lifecycle
 
     public init?(rawValue: RawValue) {
         switch rawValue {
@@ -81,6 +91,28 @@ public enum HCaptchaOrientation: Int, RawRepresentable {
 
 /// Internal data model to keep SDK init params
 struct HCaptchaConfig: CustomDebugStringConvertible {
+    // MARK: Static Properties
+
+    /// The Bundle that holds HCaptcha's assets
+    private static let bundle: Bundle = {
+        #if SWIFT_PACKAGE
+        return Bundle.module
+        #else
+        let bundle = Bundle(for: HCaptcha.self)
+        guard
+            let cocoapodsBundle = bundle
+                .path(forResource: "HCaptcha", ofType: "bundle")
+                .flatMap(Bundle.init(path:))
+        else {
+            return bundle
+        }
+
+        return cocoapodsBundle
+        #endif
+    }()
+
+    // MARK: Properties
+
     /// The raw unformated HTML file content
     let html: String
 
@@ -140,28 +172,53 @@ struct HCaptchaConfig: CustomDebugStringConvertible {
     /// A time before throw the `.htmlLoadError` if HCaptcha is not loaded
     let loadingTimeout: TimeInterval
 
+    // MARK: Computed Properties
+
+    /// The JS API endpoint to be loaded onto the HTML file.
+    public var actualEndpoint: URL {
+        var result = URLComponents(url: jsSrc, resolvingAgainstBaseURL: false)!
+        var queryItems = [
+            URLQueryItem(name: "onload", value: "onloadCallback"),
+            URLQueryItem(name: "render", value: "explicit"),
+            URLQueryItem(name: "recaptchacompat", value: "off"),
+            URLQueryItem(name: "host", value: host ?? "\(apiKey).ios-sdk.hcaptcha.com"),
+        ]
+
+        if let sentry {
+            queryItems.append(URLQueryItem(name: "sentry", value: String(sentry)))
+        }
+        if let url = endpoint {
+            queryItems.append(URLQueryItem(name: "endpoint", value: url.absoluteString))
+        }
+        if let url = assethost {
+            queryItems.append(URLQueryItem(name: "assethost", value: url.absoluteString))
+        }
+        if let url = imghost {
+            queryItems.append(URLQueryItem(name: "imghost", value: url.absoluteString))
+        }
+        if let url = reportapi {
+            queryItems.append(URLQueryItem(name: "reportapi", value: url.absoluteString))
+        }
+        if let locale {
+            queryItems.append(URLQueryItem(name: "hl", value: locale.identifier))
+        }
+        if customTheme != nil {
+            queryItems.append(URLQueryItem(name: "custom", value: String(true)))
+        }
+
+        result.percentEncodedQuery = queryItems.map {
+            $0.name +
+                "=" +
+                $0.value!.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlHostAllowed)!
+        }.joined(separator: "&")
+
+        return result.url!
+    }
+
     /// Return actual theme value based on init params. It must return valid JS object.
     var actualTheme: String {
         customTheme ?? "\"\(theme)\""
     }
-
-    /// The Bundle that holds HCaptcha's assets
-    private static let bundle: Bundle = {
-        #if SWIFT_PACKAGE
-        return Bundle.module
-        #else
-        let bundle = Bundle(for: HCaptcha.self)
-        guard
-            let cocoapodsBundle = bundle
-                .path(forResource: "HCaptcha", ofType: "bundle")
-                .flatMap(Bundle.init(path:))
-        else {
-            return bundle
-        }
-
-        return cocoapodsBundle
-        #endif
-    }()
 
     var debugDescription: String {
         let mirror = Mirror(reflecting: self)
@@ -180,6 +237,8 @@ struct HCaptchaConfig: CustomDebugStringConvertible {
 
         return result + ")"
     }
+
+    // MARK: Lifecycle
 
     /// - parameters:
     ///    - apiKey: The API key sent to the HCaptcha init
@@ -253,47 +312,6 @@ struct HCaptchaConfig: CustomDebugStringConvertible {
         self.customTheme = customTheme
         self.locale = locale
         self.loadingTimeout = loadingTimeout
-    }
-
-    /// The JS API endpoint to be loaded onto the HTML file.
-    public var actualEndpoint: URL {
-        var result = URLComponents(url: jsSrc, resolvingAgainstBaseURL: false)!
-        var queryItems = [
-            URLQueryItem(name: "onload", value: "onloadCallback"),
-            URLQueryItem(name: "render", value: "explicit"),
-            URLQueryItem(name: "recaptchacompat", value: "off"),
-            URLQueryItem(name: "host", value: host ?? "\(apiKey).ios-sdk.hcaptcha.com"),
-        ]
-
-        if let sentry {
-            queryItems.append(URLQueryItem(name: "sentry", value: String(sentry)))
-        }
-        if let url = endpoint {
-            queryItems.append(URLQueryItem(name: "endpoint", value: url.absoluteString))
-        }
-        if let url = assethost {
-            queryItems.append(URLQueryItem(name: "assethost", value: url.absoluteString))
-        }
-        if let url = imghost {
-            queryItems.append(URLQueryItem(name: "imghost", value: url.absoluteString))
-        }
-        if let url = reportapi {
-            queryItems.append(URLQueryItem(name: "reportapi", value: url.absoluteString))
-        }
-        if let locale {
-            queryItems.append(URLQueryItem(name: "hl", value: locale.identifier))
-        }
-        if customTheme != nil {
-            queryItems.append(URLQueryItem(name: "custom", value: String(true)))
-        }
-
-        result.percentEncodedQuery = queryItems.map {
-            $0.name +
-                "=" +
-                $0.value!.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlHostAllowed)!
-        }.joined(separator: "&")
-
-        return result.url!
     }
 }
 

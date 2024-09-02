@@ -1,9 +1,7 @@
 //
 //  DispatchQueue+Throttle.swift
-//  HCaptcha
 //
-//  Created by Flávio Caetano on 21/12/17.
-//  Copyright © 2018 HCaptcha. All rights reserved.
+//  Created by Sun on 2020/6/25.
 //
 
 import Foundation
@@ -67,7 +65,9 @@ extension DispatchQueue {
     ///
     /// Dispatch the action only once for each given token
     static func once(token: AnyHashable, action: () -> Void) {
-        guard !onceTokenStorage.contains(token) else { return }
+        guard !onceTokenStorage.contains(token) else {
+            return
+        }
 
         defer { objc_sync_exit(self) }
         objc_sync_enter(self)

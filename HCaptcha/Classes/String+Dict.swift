@@ -1,13 +1,10 @@
 //
 //  String+Dict.swift
-//  HCaptcha
 //
-//  Created by Flávio Caetano on 10/10/17.
-//  Copyright © 2018 HCaptcha. All rights reserved.
+//  Created by Sun on 2020/6/25.
 //
 
 import Foundation
-
 
 extension String {
     /// - parameters:

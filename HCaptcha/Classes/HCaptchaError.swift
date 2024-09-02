@@ -1,16 +1,13 @@
 //
 //  HCaptchaError.swift
-//  HCaptcha
 //
-//  Created by Flávio Caetano on 22/03/17.
-//  Copyright © 2018 HCaptcha. All rights reserved.
+//  Created by Sun on 2020/6/25.
 //
 
 import Foundation
 
 /// The codes of possible errors thrown by HCaptcha
 public enum HCaptchaError: Error, CustomStringConvertible {
-
     /// Unexpected error
     case unexpected(Error)
 
@@ -44,14 +41,12 @@ public enum HCaptchaError: Error, CustomStringConvertible {
     /// Invalid custom theme passed
     case invalidCustomTheme
 
-    public static func == (lhs: HCaptchaError, rhs: HCaptchaError) -> Bool {
-        lhs.description == rhs.description
-    }
+    // MARK: Computed Properties
 
     /// A human-readable description for each error
     public var description: String {
         switch self {
-        case .unexpected(let error):
+        case let .unexpected(error):
             "Unexpected Error: \(error)"
 
         case .networkError:
@@ -87,5 +82,11 @@ public enum HCaptchaError: Error, CustomStringConvertible {
         case .invalidCustomTheme:
             "Invalid JSON or JSObject as customTheme"
         }
+    }
+
+    // MARK: Static Functions
+
+    public static func == (lhs: HCaptchaError, rhs: HCaptchaError) -> Bool {
+        lhs.description == rhs.description
     }
 }

@@ -1,9 +1,7 @@
 //
 //  HCaptcha+Rx.swift
-//  HCaptcha
 //
-//  Created by Flávio Caetano on 11/04/17.
-//  Copyright © 2018 HCaptcha. All rights reserved.
+//  Created by Sun on 2020/6/25.
 //
 
 import RxSwift
@@ -14,7 +12,6 @@ import HCaptcha
 
 /// Provides a public extension on HCaptcha that makes it reactive.
 extension Reactive where Base: HCaptcha {
-
     /// Returns observable which allows to listen for different events from SDK
     public func events() -> Observable<(HCaptchaEvent, Any?)> {
         Observable<(HCaptchaEvent, Any?)>.create { [weak base] observer -> Disposable in
@@ -45,7 +42,7 @@ extension Reactive where Base: HCaptcha {
         Single<String>.create { [weak base] single in
             base?.validate(on: view, resetOnError: resetOnError) { result in
                 do {
-                    single(.success(try result.dematerialize()))
+                    try single(.success(result.dematerialize()))
                 } catch {
                     single(.failure(error))
                 }
